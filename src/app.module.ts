@@ -18,6 +18,7 @@ import { envConfig, envConfigSchema } from './configs/config-env';
       isGlobal: true,
       envFilePath: '.env',
       load: [() => envConfig],
+      cache: true,
     }),
   ],
   controllers: [AppController],
