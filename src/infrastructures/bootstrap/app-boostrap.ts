@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import path from 'path';
 
 import {
+  applicationConfig,
   compressionConfig,
   corsOptions,
   envConfig,
@@ -17,18 +18,24 @@ import {
 import { GlobalExceptionFilter } from '../../common/filters';
 
 import { AppModule } from '../../app.module';
+import { PrismaService } from '@/modules/shared/prisma/prisma.service';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
 
   public async bootstrap() {
-    this.app = await NestFactory.create<NestExpressApplication>(AppModule);
+    this.app = await NestFactory.create<NestExpressApplication>(
+      AppModule,
+      applicationConfig,
+    );
     this.configProxy();
     this.configCors();
     this.initializeMiddlewares();
     this.initializeUploads();
     this.setGlobalPrefix();
     this.initializeGlobalFilters();
+    this.initializePrisma();
+    await this.handleUploadDirectories();
   }
 
   private configProxy() {
@@ -59,6 +66,41 @@ export class AppBootstrap {
 
   private setGlobalPrefix() {
     this.app.setGlobalPrefix('api');
+  }
+
+  private initializePrisma() {
+    this.app.get(PrismaService).onApplicationBootstrap();
+  }
+
+  private async handleUploadDirectories() {
+    await import('fs')
+      .then((fs) => {
+        const uploadDir = [
+          'uploads',
+          'uploads/avatars',
+          'uploads/repair-cases',
+          'uploads/repair-cases/model_serial',
+          'uploads/repair-cases/repair_form',
+          'uploads/repair-cases/before_repair',
+          'uploads/repair-cases/after_repair',
+          'uploads/repair-cases/parts_components',
+          'uploads/repair-cases/warranty_invoice',
+        ];
+        uploadDir.forEach((dir) => {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+            console.log(
+              `[${envConfig.NODE_ENV}] - AppBootstrap - Created upload directory: ${dir}`,
+            );
+          }
+        });
+      })
+      .catch((error) => {
+        console.error(
+          `[${envConfig.NODE_ENV}] - AppBootstrap - Error creating upload directories`,
+          error,
+        );
+      });
   }
 
   public async listen() {
