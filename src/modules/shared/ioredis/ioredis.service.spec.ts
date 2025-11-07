@@ -8,7 +8,7 @@ import Redis from 'ioredis';
 import redisMock from 'ioredis-mock';
 
 import { IoredisService } from './ioredis.service';
-import { REDIS_CLIENT } from './ioredis.provider';
+import { REDIS_CLIENT } from './ioredis.constants';
 
 describe('IoredisService', () => {
   let service: IoredisService;
