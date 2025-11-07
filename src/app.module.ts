@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 
 import { envConfig, envConfigSchema } from './configs/config-env';
 import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
       cache: true,
     }),
     PrismaModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
