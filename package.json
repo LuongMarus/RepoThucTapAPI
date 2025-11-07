@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node -r tsconfig-paths/register dist/main",
     "db:dev": "yarn prisma dev",
     "db:reset": "yarn prisma migrate reset",
     "db:generate": "yarn prisma generate",
