@@ -13,6 +13,8 @@ export const envConfigSchema = z.object({
   JWT_EXPIRES_IN: z.string(),
   JWT_REFRESH_EXPIRES_IN: z.string(),
   // Redis
-  REDIS_URL: z.url(),
-  REDIS_DB: z.coerce.number().int().positive().default(1),
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z.coerce.number().int().positive().default(6379),
+  REDIS_PASSWORD: z.string().optional().default(''),
+  REDIS_DB: z.coerce.number().int().positive().default(0),
 });

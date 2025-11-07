@@ -8,11 +8,9 @@ import {
 } from '@nestjs/terminus';
 
 import { PrismaService } from '@/modules/shared/prisma/prisma.service';
-import {
-  REDIS_CLIENT,
-  type RedisClient,
-} from '@/modules/shared/ioredis/ioredis.provider';
+import { REDIS_CLIENT } from '@/modules/shared/ioredis/ioredis.constants';
 import { IoredisHealthIndicator } from '@/modules/shared/ioredis/ioredis.health';
+import type { RedisClient } from '@/modules/shared/ioredis/ioredis.provider';
 
 @Controller('health')
 export class HealthController {

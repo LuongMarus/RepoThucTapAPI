@@ -24,7 +24,7 @@ import { envConfigSchema } from './common/validations/env-config';
       isGlobal: true,
       envFilePath: '.env',
       load: [() => envConfig],
-      cache: true,
+      cache: envConfig.NODE_ENV === 'production' ? true : false,
     }),
     PrismaModule,
     IoredisModule,
