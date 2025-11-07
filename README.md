@@ -12,7 +12,11 @@
 yarn
 ```
 
-2. Setup .env (see more .env.example)
+2. Setup .env (see more .env.example) and docker compose (development)
+
+```bash
+yarn dev:services
+```
 
 3. Create Generate Prisma Client code (use it to build query postgres)
 
