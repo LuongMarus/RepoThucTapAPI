@@ -4,9 +4,12 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { envConfig, envConfigSchema } from './configs/config-env';
+import { envConfig } from './configs/config-env';
 import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
 import { HealthModule } from './modules/health/health.module';
+import { IoredisModule } from './modules/shared/ioredis/ioredis.module';
+
+import { envConfigSchema } from './common/validations/env-config';
 
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { HealthModule } from './modules/health/health.module';
       cache: true,
     }),
     PrismaModule,
+    IoredisModule,
     HealthModule,
   ],
   controllers: [AppController],

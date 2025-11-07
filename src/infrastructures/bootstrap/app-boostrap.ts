@@ -104,6 +104,8 @@ export class AppBootstrap {
   }
 
   public async listen() {
+    // Starts listening for shutdown hooks
+    this.app.enableShutdownHooks();
     await this.app.listen(envConfig.PORT);
     console.log(`Server is running on port ${envConfig.PORT}`);
     console.log(`http://localhost:${envConfig.PORT}`);
