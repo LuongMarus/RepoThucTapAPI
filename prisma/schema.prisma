@@ -18,10 +18,11 @@ model User {
   id       String  @id @default(uuid(7))
   username String  @unique
   fullName String
-  role     String // later: enum (admin, warehouse, accountant, ...)
+  role     String  // later: enum (admin, warehouse, accountant, ...)
   email    String? @unique
+  avatar   String?
   phone    String? @db.VarChar(20)
-  isActive Boolean @default(true)
+  status   UserStatus @default(active)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -351,4 +352,10 @@ model PhanQuyen {
   nguoiDung User     @relation(fields: [nguoiDungId], references: [id])
 
   @@unique([chucNangId, nguoiDungId])
+}
+
+enum UserStatus {
+  active
+  inactive
+  suspended
 }
