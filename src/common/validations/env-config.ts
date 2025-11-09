@@ -32,4 +32,6 @@ export const envConfigSchema = z.object({
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
   REDIS_PASSWORD: z.string().optional().default(''),
   REDIS_DB: z.coerce.number().int().positive().default(0),
+  // CSRF
+  CSRF_SECRET: z.string().min(32),
 });

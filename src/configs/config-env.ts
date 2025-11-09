@@ -30,6 +30,8 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_DB: process.env.REDIS_DB,
+  // CSRF
+  CSRF_SECRET: process.env.CSRF_SECRET,
 });
 
 console.log(`[${envConfig.NODE_ENV}] envConfig`, envConfig);
