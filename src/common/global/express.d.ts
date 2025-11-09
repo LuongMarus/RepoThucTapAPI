@@ -1,19 +1,18 @@
 import 'express';
-import { RoleType, RoleScope } from '@/types/role';
-import { RefreshTokenPayload } from '@/types/jwt';
-import { TempTokenPayload } from '@/modules/identity/key-token/key-token.service';
+
+import {
+  AccessTokenPayload,
+  KeyStoreForJWT,
+  RefreshTokenPayload,
+  TempTokenPayload,
+} from '@/types/jwt';
 
 declare global {
   namespace Express {
     interface Request {
-      user: {
-        id: string;
-        username: string;
-        fullName: string;
-        role: RoleType;
-        roleScope: RoleScope;
-        permissions: string[];
-      };
+      keyStore: KeyStoreForJWT;
+
+      user: AccessTokenPayload;
       refresh: RefreshTokenPayload;
       refreshToken?: string;
 

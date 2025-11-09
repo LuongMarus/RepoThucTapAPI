@@ -4,6 +4,7 @@
  */
 import { KeyToken } from 'generated/prisma';
 import { JwtPayload } from 'jsonwebtoken';
+import { RoleScope, RoleType } from './role';
 
 export interface RefreshTokenPayload
   extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
@@ -13,7 +14,24 @@ export interface RefreshTokenPayload
   sessionId?: string; // optional to tracking multiple devices
 }
 
+export interface AccessTokenPayload
+  extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string;
+  role: RoleType;
+  roleScope: RoleScope;
+  permissions: string[];
+}
+
 export type KeyStoreForJWT = Pick<
   KeyToken,
   'id' | 'privateKey' | 'publicKey' | 'refreshToken' | 'refreshTokenUsed'
 >;
+
+export interface TempTokenPayload {
+  userId: string;
+  email: string;
+  type: 'login' | 'forgot-password';
+}
