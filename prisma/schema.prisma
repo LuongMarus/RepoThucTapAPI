@@ -22,6 +22,8 @@ model User {
   email    String? @unique
   avatar   String?
   phone    String? @db.VarChar(20)
+  password String
+  secretOtp String?
   status   UserStatus @default(active)
 
   createdAt DateTime @default(now())
@@ -32,6 +34,7 @@ model User {
 
   // Quan hệ phân quyền
   phanQuyens PhanQuyen[]
+  keyToken KeyToken?
 }
 
 model DonViTinh {
@@ -352,6 +355,23 @@ model PhanQuyen {
   nguoiDung User     @relation(fields: [nguoiDungId], references: [id])
 
   @@unique([chucNangId, nguoiDungId])
+}
+
+model KeyToken {
+  id               String @id @default(uuid(7))
+  userId           String
+  privateKey       String
+  publicKey        String
+  refreshToken     String
+  refreshTokenUsed String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String?  @db.VarChar(255)
+  updatedBy        String?  @db.VarChar(255)
+
+  user    User @relation(fields: [userId], references: [id])
+
+  @@unique([userId])
 }
 
 enum UserStatus {
