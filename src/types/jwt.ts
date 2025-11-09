@@ -2,6 +2,7 @@
  * @description Registered Claim Names
  * @link https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
  */
+import { KeyToken } from 'generated/prisma';
 import { JwtPayload } from 'jsonwebtoken';
 
 export interface RefreshTokenPayload
@@ -11,3 +12,8 @@ export interface RefreshTokenPayload
   email: string;
   sessionId?: string; // optional to tracking multiple devices
 }
+
+export type KeyStoreForJWT = Pick<
+  KeyToken,
+  'id' | 'privateKey' | 'publicKey' | 'refreshToken' | 'refreshTokenUsed'
+>;
