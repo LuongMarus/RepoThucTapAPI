@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard, seconds } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,7 +12,9 @@ import { HealthModule } from '../modules/shared/health/health.module';
 import { IoredisModule } from '../modules/shared/ioredis/ioredis.module';
 
 import { envConfigSchema } from '../common/validations/env-config';
-
+import { KEY_THROTTLER } from '@/common/constants';
+import { MulterModule } from '@nestjs/platform-express';
+import { uploadDir } from '@/configs';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,11 +30,37 @@ import { envConfigSchema } from '../common/validations/env-config';
       load: [() => envConfig],
       cache: envConfig.NODE_ENV === 'production' ? true : false,
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: KEY_THROTTLER.SHORT,
+        ttl: seconds(1),
+        limit: 3,
+      },
+      {
+        name: KEY_THROTTLER.MEDIUM,
+        ttl: seconds(10),
+        limit: 20,
+      },
+      {
+        name: KEY_THROTTLER.LONG,
+        ttl: seconds(60),
+        limit: 100,
+      },
+    ]),
+    MulterModule.register({
+      dest: `../../${uploadDir[0]}`,
+    }),
     PrismaModule,
     IoredisModule,
     HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
