@@ -34,7 +34,6 @@ model User {
 
   // Quan hệ phân quyền
   phanQuyens PhanQuyen[]
-  keyToken KeyToken?
 }
 
 model DonViTinh {
@@ -368,10 +367,6 @@ model KeyToken {
   updatedAt        DateTime @updatedAt
   createdBy        String?  @db.VarChar(255)
   updatedBy        String?  @db.VarChar(255)
-
-  user    User @relation(fields: [userId], references: [id])
-
-  @@unique([userId])
 }
 
 enum UserStatus {
