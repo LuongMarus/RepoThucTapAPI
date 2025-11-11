@@ -68,3 +68,4 @@ $ yarn run test:cov
 - [Compodoc Reference in NestJS](https://docs.nestjs.com/recipes/documentation)
 - [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
 - [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
+- [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
