@@ -10,14 +10,9 @@ export const envConfigSchema = z.object({
   // CORS
   CORS_ORIGIN: z.string(),
   // TEMPORARY JWT
-  TEMP_TOKEN_SECRET: z.string(),
-  TEMP_TOKEN_EXPIRES_IN: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(5 * 60),
-  // Default secret OTP
-  DEFAULT_SECRET_OTP: z.string(),
+  TEMP_REFRESH_TOKEN_SECRET: z.string(),
+  // Public key for creation JWT: "pkcs1" | "spki" | "pkcs8" | "sec1"
+  PUBLIC_KEY_TYPE: z.enum(['pkcs1', 'spki', 'pkcs8', 'sec1']).default('spki'),
   // CSRF
   CSRF_SECRET: z.string().min(32),
   // Encyption default

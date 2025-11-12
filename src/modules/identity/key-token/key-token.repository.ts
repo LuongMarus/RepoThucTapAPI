@@ -79,6 +79,17 @@ export class KeyTokenRepository {
     return buildQuery;
   }
 
+  async updateRefreshTokenById(
+    id: string,
+    refreshToken: string,
+  ): Promise<boolean> {
+    const { count } = await this.prisma.keyToken.updateMany({
+      where: { id },
+      data: { refreshToken },
+    });
+    return count > 0;
+  }
+
   async deleteById(keyTokenId: string): Promise<boolean> {
     const isDeleted = await this.prisma.keyToken
       .delete({ where: { id: keyTokenId } })

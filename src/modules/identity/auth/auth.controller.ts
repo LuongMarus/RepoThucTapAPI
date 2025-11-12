@@ -15,23 +15,17 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import { ZodValidationPipe } from '@/common/pipes/validation.pipe';
-import {
-  AUTHORIZATION,
-  CLIENT_ID,
-  REFRESH_TOKEN,
-} from '@/common/constants/headers';
+import { AUTHORIZATION, REFRESH_TOKEN } from '@/common/constants/headers';
 import {
   JwtAuthenticateGuard,
-  JwtAuthenticateTemporaryGuard,
   JwtRefreshAuthenticateGuard,
 } from '@/common/guards';
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { AuthService } from './auth.service';
-import { authLoginSchema, authVerifyOtpSchema } from './validations';
+import { authLoginSchema } from './validations';
 
 import type { AuthLoginDto } from './dto/auth-login.dto';
-import type { AuthVerifyOtpDto } from './dto/auth-verify-otp.dto';
 import type { ResponseController } from '@/types/response-controller';
 import { type FoundCurrentUser, UserService } from '../user';
 
@@ -78,22 +72,22 @@ export class AuthController {
     };
   }
 
-  @Post('verify-otp')
-  @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @UseGuards(JwtAuthenticateTemporaryGuard)
-  @UsePipes(new ZodValidationPipe({ body: authVerifyOtpSchema }))
-  async verifyOtp(
-    @Body() body: AuthVerifyOtpDto,
-    @Headers(CLIENT_ID.toString()) userId: string,
-  ): Promise<ResponseController<unknown>> {
-    const result = await this.authService.verifyOtp({ ...body, userId });
+  // @Post('verify-otp')
+  // @HttpCode(HttpStatus.OK)
+  // @Throttle({ default: { limit: 5, ttl: 60000 } })
+  // @UseGuards(JwtAuthenticateTemporaryGuard)
+  // @UsePipes(new ZodValidationPipe({ body: authVerifyOtpSchema }))
+  // async verifyOtp(
+  //   @Body() body: AuthVerifyOtpDto,
+  //   @Headers(CLIENT_ID.toString()) userId: string,
+  // ): Promise<ResponseController<unknown>> {
+  //   const result = await this.authService.verifyOtp({ ...body, userId });
 
-    return {
-      message: 'OTP verified successfully!',
-      metadata: result,
-    };
-  }
+  //   return {
+  //     message: 'OTP verified successfully!',
+  //     metadata: result,
+  //   };
+  // }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)

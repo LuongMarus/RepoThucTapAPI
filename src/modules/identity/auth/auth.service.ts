@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException,
@@ -13,19 +12,15 @@ import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 
 import { KeyTokenRepository, KeyTokenService } from '../key-token';
-import { MailService } from '../mail';
-import { OtpService } from '../otp';
 import { UserRepository } from '../user';
 import { IoredisService } from '../../shared/ioredis';
 
-import { KEY_CACHE } from '@/common/constants';
-import { decrypt, encrypt, getInfoData, toErrorMessage } from '@/utils';
+import { getInfoData } from '@/utils';
 
 import { Prisma } from '@generated/prisma';
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { EnvConfig } from '@/configs';
 import type { AccessTokenPayload } from '@/types/jwt';
-import type { AuthVerifyOtpDto } from './dto/auth-verify-otp.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,22 +30,30 @@ export class AuthService {
     private readonly configService: ConfigService<EnvConfig>,
     private readonly keyTokenService: KeyTokenService,
     private readonly keyTokenRepository: KeyTokenRepository,
-    private readonly mailService: MailService,
     private readonly userRepository: UserRepository,
-    private readonly otpService: OtpService,
     private readonly redisService: IoredisService,
   ) {}
 
   async login(body: AuthLoginDto) {
+    const tempRefreshTokenSecret =
+      this.configService.get<string>('TEMP_REFRESH_TOKEN_SECRET') ??
+      crypto.randomBytes(32).toString('hex');
+    const publicKeyType =
+      this.configService.get<EnvConfig['PUBLIC_KEY_TYPE']>('PUBLIC_KEY_TYPE') ??
+      'spki';
+
     const foundUser: FoundUserLogin | null =
       await this.userRepository.findOneByUsername(body.username, {
         select: {
           id: true,
           username: true,
+          fullName: true,
           email: true,
           password: true,
           secretOtp: true,
           status: true,
+          permissions: true,
+          role: true,
         },
       });
 
@@ -65,195 +68,86 @@ export class AuthService {
     const isMatch = await bcrypt.compare(body.password, foundUser.password);
     if (!isMatch) throw new UnauthorizedException('Authentication error!');
 
-    const defaultSecretOtp =
-      this.configService.get<string>('DEFAULT_SECRET_OTP');
-    if (!defaultSecretOtp) {
-      throw new BadRequestException('Default secret OTP is not set');
-    }
-    const otpCode = this.otpService.generateOtp(
-      foundUser.secretOtp ?? defaultSecretOtp,
-    );
-
     const { id: userId } = foundUser;
-    const isUserId = userId !== undefined ? userId : '';
-    const otpKey = `${KEY_CACHE.OTP}:${isUserId}`;
-    const deleteKey = `${KEY_CACHE.OTP}:delete:${isUserId}`;
-    const tempUserDataKey = `${KEY_CACHE.TEMP_USER_DATA}:${isUserId}`;
 
-    // Encrypt sensitive OTP data
-    const encryptedOtp = encrypt(otpCode);
-    const encryptedUserData = encrypt(
-      JSON.stringify({
-        userId: isUserId,
-        email: foundUser.email,
-        username: foundUser.username,
+    // Generate RSA key pair and create key token in parallel with Redis cleanup
+    const [keyPair] = await Promise.all([
+      // RSA key generation (CPU-bound, run in parallel)
+      Promise.resolve().then(() => {
+        const keys = crypto.generateKeyPairSync('rsa', {
+          modulusLength: 2048,
+          publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+          privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
+        });
+        return keys;
       }),
-    );
-
-    await Promise.all([
-      this.redisService.set(otpKey, encryptedOtp, 60 * 5),
-      this.redisService.set(deleteKey, isUserId, 60 * 5),
-      this.redisService.set(tempUserDataKey, encryptedUserData, 60 * 5),
     ]);
 
-    const emailStart = Date.now();
-    this.mailService
-      .sendOtpToEmail(foundUser.username, otpCode, foundUser.email)
-      .then(() => {
-        const emailDuration = Date.now() - emailStart;
-        console.log(
-          `[ASYNC] - Login OTP email sent successfully in ${emailDuration}ms`,
-        );
-      })
-      .catch((emailErr) => {
-        console.error('[ASYNC] - Email send failed:', emailErr);
+    // Create key token (now with generated keys)
+    const { publicKey: publicKeyString, keyStoreId } =
+      await this.keyTokenService.createKeyToken({
+        userId: userId,
+        publicKey: keyPair.publicKey,
+        privateKey: keyPair.privateKey,
+        refreshToken: tempRefreshTokenSecret,
       });
 
-    // Create temporary JWT token for OTP verification
-    const { tempToken, expiresIn } = this.keyTokenService.createTempToken({
-      userId: isUserId,
-      email: foundUser.email,
-      type: 'login',
+    if (!publicKeyString || !keyStoreId) {
+      throw new BadRequestException('Failed to create key token');
+    }
+
+    // Generate JWT tokens with proper structure
+    const publicKeyObject = crypto.createPublicKey(publicKeyString);
+    const publicKeyToString = publicKeyObject.export({
+      type: publicKeyType,
+      format: 'pem',
     });
 
-    const user = getInfoData<FoundUserLogin, 'id' | 'username' | 'email'>({
-      fields: ['id', 'username', 'email'],
+    const tokens = this.keyTokenService.createTokenPair(
+      {
+        id: foundUser.id,
+        email: foundUser.email ?? '',
+        username: foundUser.username,
+        fullName: foundUser.fullName,
+        role: 'super_admin',
+        roleScope: 'SYSTEM',
+        permissions: [],
+        aud: 'access:common',
+      },
+      {
+        id: foundUser.id,
+        email: foundUser.email ?? '',
+        keyStoreId: keyStoreId,
+        sessionId: '',
+        aud: 'refresh:common',
+      },
+      publicKeyToString,
+      keyPair.privateKey,
+    );
+
+    // Update field refreshToken of KeyToken
+    await this.keyTokenRepository.updateRefreshTokenById(
+      keyStoreId,
+      tokens.refreshToken,
+    );
+
+    const userData = getInfoData<
+      FoundUserLogin,
+      'id' | 'username' | 'email' | 'fullName' | 'role' | 'permissions'
+    >({
+      fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
       object: foundUser,
     });
 
     return {
-      user,
-      tempToken,
-      expiresIn,
+      user: userData,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresInAccessToken: tokens.exp_accessToken,
+      expiresInRefreshToken: tokens.exp_refreshToken,
+      iatAccessToken: tokens.iat_accessToken,
+      iatRefreshToken: tokens.iat_refreshToken,
     };
-  }
-
-  async verifyOtp(
-    body: AuthVerifyOtpDto & { userId: string; refreshToken?: string },
-  ) {
-    const { code, userId, refreshToken = '' } = body;
-    try {
-      if (!userId) {
-        throw new UnauthorizedException('User ID is required');
-      }
-      const otpKey = `${KEY_CACHE.OTP}:${userId}`;
-      const encryptedOtp = await this.redisService.get(otpKey);
-      if (!encryptedOtp) {
-        throw new NotFoundException('OTP not found');
-      }
-      const otp = decrypt(encryptedOtp);
-      if (otp !== code) {
-        throw new BadRequestException('OTP is invalid');
-      }
-
-      const foundUser = await this.userRepository.findOneById(userId, {
-        select: {
-          id: true,
-          username: true,
-          fullName: true,
-          email: true,
-          role: true,
-          permissions: true,
-          status: true,
-        },
-      });
-      if (!foundUser) {
-        throw new NotFoundException('User not found!');
-      }
-
-      // Update user status to 'active'
-      // await this.userRepository.updateOneById(userId, { status: 'active' });
-
-      // Generate RSA key pair and create key token in parallel with Redis cleanup
-      const parallelStart = Date.now();
-      const deleteKey = `${KEY_CACHE.OTP}:delete:${userId}`;
-      const [keyPair] = await Promise.all([
-        // RSA key generation (CPU-bound, run in parallel)
-        Promise.resolve().then(() => {
-          const keys = crypto.generateKeyPairSync('rsa', {
-            modulusLength: 2048,
-            publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
-            privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
-          });
-          return keys;
-        }),
-        // Clean up Redis keys early (can happen in parallel)
-        Promise.all([
-          this.redisService.delete(otpKey),
-          this.redisService.delete(deleteKey),
-        ]).then(() => {
-          const cleanupDuration = Date.now() - parallelStart;
-          console.log(`[PERF] VerifyOTP.Clean up Redis: ${cleanupDuration}ms`);
-        }),
-      ]);
-
-      // Create key token (now with generated keys)
-      const { publicKey: publicKeyString, keyStoreId } =
-        await this.keyTokenService.createKeyToken({
-          userId: foundUser.id,
-          publicKey: keyPair.publicKey,
-          privateKey: keyPair.privateKey,
-          refreshToken: refreshToken,
-        });
-
-      if (!publicKeyString || !keyStoreId) {
-        throw new BadRequestException('Failed to create key token');
-      }
-
-      // Generate JWT tokens with proper structure
-      const publicKeyObject = crypto.createPublicKey(publicKeyString);
-      const publicKeyToString = publicKeyObject.export({
-        type: 'spki',
-        format: 'pem',
-      });
-
-      const tokens = this.keyTokenService.createTokenPair(
-        {
-          id: foundUser.id,
-          email: foundUser.email ?? '',
-          username: foundUser.username,
-          fullName: foundUser.fullName,
-          role: 'super_admin',
-          roleScope: 'SYSTEM',
-          permissions: [],
-          aud: 'access:common',
-        },
-        {
-          id: foundUser.id,
-          email: foundUser.email ?? '',
-          keyStoreId: keyStoreId,
-          sessionId: '',
-          aud: 'refresh:common',
-        },
-        publicKeyToString,
-        keyPair.privateKey,
-      );
-
-      // Clean up temporary Redis data
-      const tempUserDataKey = `${KEY_CACHE.TEMP_USER_DATA}:${userId}`;
-      await Promise.all([this.redisService.delete(tempUserDataKey)]);
-
-      const userData = getInfoData<
-        FoundUserVerifyOtp,
-        'id' | 'username' | 'email' | 'fullName' | 'role' | 'permissions'
-      >({
-        fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
-        object: foundUser,
-      });
-
-      return {
-        user: userData,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        expiresInAccessToken: tokens.exp_accessToken,
-        expiresInRefreshToken: tokens.exp_refreshToken,
-        iatAccessToken: tokens.iat_accessToken,
-        iatRefreshToken: tokens.iat_refreshToken,
-      };
-    } catch (error) {
-      this.logger.error('Error verify OTP:', toErrorMessage(error));
-      throw new InternalServerErrorException('Error verify OTP!');
-    }
   }
 
   async logout({
@@ -405,22 +299,9 @@ type FoundUserLogin = Pick<
     select: {
       id: true;
       username: true;
+      fullName: true;
       email: true;
       password: true;
-      secretOtp: true;
-      status: true;
-    };
-  }>,
-  'id' | 'username' | 'email' | 'password' | 'secretOtp' | 'status'
->;
-
-type FoundUserVerifyOtp = Pick<
-  Prisma.UserGetPayload<{
-    select: {
-      id: true;
-      username: true;
-      email: true;
-      fullName: true;
       role: true;
       permissions: true;
       secretOtp: true;
@@ -429,8 +310,9 @@ type FoundUserVerifyOtp = Pick<
   }>,
   | 'id'
   | 'username'
-  | 'email'
   | 'fullName'
+  | 'email'
+  | 'password'
   | 'role'
   | 'permissions'
   | 'secretOtp'

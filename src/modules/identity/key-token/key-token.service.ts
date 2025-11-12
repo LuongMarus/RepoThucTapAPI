@@ -5,11 +5,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import JWT, { VerifyErrors } from 'jsonwebtoken';
 
-import { EnvConfig } from '@/configs/config-env';
 import { KEY_CACHE } from '@/common/constants';
 import { toErrorMessage } from '@/utils';
 import { IoredisService } from '@/modules/shared/ioredis';
@@ -18,7 +16,6 @@ import {
   KeyStoreForJWT,
   PairToken,
   RefreshTokenPayload,
-  TempTokenPayload,
 } from '@/types/jwt';
 import { KeyTokenRepository } from './key-token.repository';
 import { KeyToken } from '@generated/prisma';
@@ -28,7 +25,6 @@ export class KeyTokenService {
   private readonly logger = new Logger(KeyTokenService.name);
 
   constructor(
-    private readonly configService: ConfigService<EnvConfig>,
     private readonly redisService: IoredisService,
     private readonly keyTokenRepository: KeyTokenRepository,
   ) {}
@@ -297,63 +293,6 @@ export class KeyTokenService {
 
   decodeJWT<T>(token: string): T {
     return JWT.decode(token) as T;
-  }
-
-  createTempToken(payload: TempTokenPayload): {
-    tempToken: string;
-    expiresIn: number;
-  } {
-    const TEMP_TOKEN_SECRET =
-      this.configService.get<string>('TEMP_TOKEN_SECRET') || '';
-    const TEMP_TOKEN_EXPIRY =
-      this.configService.get<number>('TEMP_TOKEN_EXPIRES_IN') || 5 * 60;
-    try {
-      const tempToken = JWT.sign(payload, TEMP_TOKEN_SECRET, {
-        expiresIn: TEMP_TOKEN_EXPIRY,
-        algorithm: 'HS256',
-      });
-
-      return {
-        tempToken,
-        expiresIn: TEMP_TOKEN_EXPIRY,
-      };
-    } catch (error) {
-      console.error('Failed to create temp token:', error);
-      throw new InternalServerErrorException('Failed to create temp token');
-    }
-  }
-
-  /**
-   * Verifies and decodes a temporary JWT token
-   * Throws error if token is invalid, expired, or tampered with
-   */
-  verifyTempToken(token: string): TempTokenPayload {
-    const TEMP_TOKEN_SECRET =
-      this.configService.get<string>('TEMP_TOKEN_SECRET') || '';
-    try {
-      const decoded = JWT.verify(token, TEMP_TOKEN_SECRET, {
-        algorithms: ['HS256'],
-      }) as TempTokenPayload;
-
-      // Ensure it has the required fields
-      if (!decoded.userId || !decoded.email || !decoded.type) {
-        throw new UnauthorizedException('Invalid token payload');
-      }
-
-      return decoded;
-    } catch (error) {
-      if (error instanceof JWT.TokenExpiredError) {
-        throw new UnauthorizedException(
-          'Temporary token has expired. Please login again.',
-        );
-      }
-
-      if (error instanceof JWT.JsonWebTokenError) {
-        throw new UnauthorizedException('Invalid temporary token');
-      }
-
-      throw error;
-    }
   }
 
   verifyCallbackOption(

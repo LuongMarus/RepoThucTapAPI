@@ -8,14 +8,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { envConfig, uploadDir } from '@/configs';
-import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
-import { HealthModule } from '@/modules/shared/health/health.module';
-import { IoredisModule } from '@/modules/shared/ioredis/ioredis.module';
 
 import { envConfigSchema } from '@/common/validations/env-config';
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { AuthModule } from '@/modules/identity';
+import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
+
 @Module({
   imports: [
     ConfigModule.forRoot({

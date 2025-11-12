@@ -8,9 +8,9 @@ import { RoleScope, RoleType } from './role';
 
 export interface RefreshTokenPayload
   extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
-  keyStoreId: string;
   id: string;
   email: string;
+  keyStoreId: string;
   sessionId?: string; // optional to tracking multiple devices
 }
 
@@ -29,12 +29,6 @@ export type KeyStoreForJWT = Pick<
   KeyToken,
   'id' | 'privateKey' | 'publicKey' | 'refreshToken' | 'refreshTokenUsed'
 >;
-
-export interface TempTokenPayload {
-  userId: string;
-  email: string;
-  type: 'login' | 'forgot-password';
-}
 
 export interface PairToken {
   accessToken: string;

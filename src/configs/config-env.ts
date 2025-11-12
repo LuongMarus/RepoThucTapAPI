@@ -15,11 +15,10 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   CORS_ORIGIN: process.env.CORS_ORIGIN,
 
   // TEMPORARY JWT
-  TEMP_TOKEN_SECRET: process.env.TEMP_TOKEN_SECRET,
-  TEMP_TOKEN_EXPIRES_IN: process.env.TEMP_TOKEN_EXPIRES_IN,
+  TEMP_REFRESH_TOKEN_SECRET: process.env.TEMP_REFRESH_TOKEN_SECRET,
 
-  // Default secret OTP
-  DEFAULT_SECRET_OTP: process.env.DEFAULT_SECRET_OTP,
+  // Public key for creation JWT
+  PUBLIC_KEY_TYPE: process.env.PUBLIC_KEY_TYPE,
 
   // CSRF
   CSRF_SECRET: process.env.CSRF_SECRET,
