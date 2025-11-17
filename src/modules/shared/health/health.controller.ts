@@ -14,8 +14,10 @@ import { KEY_THROTTLER } from '@/common/constants';
 
 import { PrismaService } from '@/modules/shared/prisma/prisma.service';
 import { IoredisHealthIndicator } from '../ioredis';
-import type { RedisClient } from '../ioredis/ioredis.provider';
 import { REDIS_CLIENT } from '../ioredis/ioredis.constants';
+
+import type { RedisClient } from '../ioredis/ioredis.provider';
+import type { ResponseController } from '@/types/response-controller';
 
 @Controller('health')
 export class HealthController {
@@ -38,8 +40,8 @@ export class HealthController {
   @Get()
   @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 10000 } })
   @HealthCheck()
-  check(): Promise<HealthCheckResult> {
-    return this.health.check([
+  async check(): Promise<ResponseController<HealthCheckResult>> {
+    const result: HealthCheckResult = await this.health.check([
       () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
       () => this.prisma.pingCheck('prisma', this.prismaService),
       () => this.ioredis.pingCheck('ioredis', this.redisClient),
@@ -50,5 +52,10 @@ export class HealthController {
         }),
       () => this.memory.checkHeap('memory_heap', 50 * 1024 * 1024), // 50MB
     ]);
+
+    return {
+      message: 'Health check successfully!',
+      metadata: result,
+    };
   }
 }
