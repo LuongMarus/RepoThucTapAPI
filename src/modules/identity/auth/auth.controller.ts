@@ -73,23 +73,6 @@ export class AuthController {
     };
   }
 
-  // @Post('verify-otp')
-  // @HttpCode(HttpStatus.OK)
-  // @Throttle({ default: { limit: 5, ttl: 60000 } })
-  // @UseGuards(JwtAuthenticateTemporaryGuard)
-  // @UsePipes(new ZodValidationPipe({ body: authVerifyOtpSchema }))
-  // async verifyOtp(
-  //   @Body() body: AuthVerifyOtpDto,
-  //   @Headers(CLIENT_ID.toString()) userId: string,
-  // ): Promise<ResponseController<unknown>> {
-  //   const result = await this.authService.verifyOtp({ ...body, userId });
-
-  //   return {
-  //     message: 'OTP verified successfully!',
-  //     metadata: result,
-  //   };
-  // }
-
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 10, ttl: 10000 } })
