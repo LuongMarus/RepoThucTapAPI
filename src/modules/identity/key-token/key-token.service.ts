@@ -19,6 +19,8 @@ import {
 } from '@/types/jwt';
 import { KeyTokenRepository } from './key-token.repository';
 import { KeyToken } from '@generated/prisma';
+import { extractInfoDevice } from '@/utils/extract-info-device';
+import { Session } from '@/types/session';
 
 @Injectable()
 export class KeyTokenService {
@@ -109,12 +111,14 @@ export class KeyTokenService {
     }
   }
 
-  createTokenPair(
+  async createTokenPair(
     payloadAT: string | Buffer | AccessTokenPayload,
     payloadRT: string | Buffer | RefreshTokenPayload,
     publicKey: string | Buffer<ArrayBufferLike>,
     privateKey: string,
-  ): PairToken {
+    userAgent: string,
+    ipAddress: string,
+  ): Promise<PairToken> {
     try {
       const accessToken = JWT.sign(payloadAT, privateKey, {
         algorithm: 'RS256',
@@ -142,6 +146,29 @@ export class KeyTokenService {
           this.verifyCallbackOption(err, decodedAccessToken),
         );
       });
+
+      // Save user agent and ip address to session
+      const deviceInfo = extractInfoDevice(userAgent, ipAddress);
+      const sessionData: Session = {
+        refreshToken: refreshToken,
+        userAgent: userAgent,
+        ipAddress: ipAddress,
+        deviceInfo: {
+          deviceName: deviceInfo.deviceName || 'Unknown',
+          deviceType: deviceInfo.deviceType || 'desktop',
+          os: deviceInfo.os || 'Unknown',
+          browser: deviceInfo.browser || 'Unknown',
+          ipAddress: deviceInfo.ipAddress || '0.0.0.0',
+        },
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + '3D').toISOString(),
+        revoked: false,
+      };
+
+      await this.keyTokenRepository.saveSessionToRedis(
+        decodedAccessToken.id,
+        sessionData,
+      );
 
       return {
         accessToken,

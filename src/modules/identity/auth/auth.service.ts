@@ -36,7 +36,11 @@ export class AuthService {
     private readonly redisService: IoredisService,
   ) {}
 
-  async login(body: AuthLoginDto): Promise<LoginResponse> {
+  async login(
+    body: AuthLoginDto,
+    userAgent: string,
+    ipAddress: string,
+  ): Promise<LoginResponse> {
     const tempRefreshTokenSecret =
       this.configService.get<string>('TEMP_REFRESH_TOKEN_SECRET') ??
       crypto.randomBytes(32).toString('hex');
@@ -105,7 +109,7 @@ export class AuthService {
       format: 'pem',
     });
 
-    const tokens = this.keyTokenService.createTokenPair(
+    const tokens = await this.keyTokenService.createTokenPair(
       {
         id: foundUser.id,
         email: foundUser.email ?? '',
@@ -125,6 +129,8 @@ export class AuthService {
       },
       publicKeyToString,
       keyPair.privateKey,
+      userAgent,
+      ipAddress,
     );
 
     // Update field refreshToken of KeyToken
@@ -190,11 +196,15 @@ export class AuthService {
     userId,
     email,
     refreshToken,
+    userAgent,
+    ipAddress,
   }: {
     keyStoreId: string;
     userId: string;
     email: string;
     refreshToken: string;
+    userAgent: string;
+    ipAddress: string;
   }) {
     const keyStoreData = (await this.keyTokenRepository.findOneById(
       keyStoreId,
@@ -255,7 +265,7 @@ export class AuthService {
       throw new NotFoundException('User not found!');
     }
 
-    const tokens = this.keyTokenService.createTokenPair(
+    const tokens = await this.keyTokenService.createTokenPair(
       {
         id: isFoundUser.id,
         email: isFoundUser.email ?? '',
@@ -275,6 +285,8 @@ export class AuthService {
       },
       keyStorePublicKey,
       keyStorePrivateKey,
+      userAgent,
+      ipAddress,
     );
 
     const getKeyStore = (await this.keyTokenRepository.findOneById(

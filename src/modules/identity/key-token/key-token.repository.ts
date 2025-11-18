@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { Prisma } from '@generated/prisma';
 import { PrismaService } from '@/modules/shared/prisma';
 import { DefaultArgs } from '@generated/prisma/runtime/library';
+import { IoredisService } from '@/modules/shared/ioredis';
+import { Session } from '@/types/session';
 
 @Injectable()
 export class KeyTokenRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(KeyTokenRepository.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private redisService: IoredisService,
+  ) {}
 
   async findOneById<T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined>(
     id: string,
@@ -110,4 +117,16 @@ export class KeyTokenRepository {
   }
 
   deleteKeyStoreCachedByUserId() {}
+
+  // REDIS
+  async saveSessionToRedis(
+    userId: string,
+    sessionData: Session,
+  ): Promise<void> {
+    const key = `user_sessions:${userId}`;
+    const sessionId = `session:${Date.now()}`;
+
+    await this.redisService.hset(key, sessionId, JSON.stringify(sessionData));
+    await this.redisService.setExpire(key, 3 * 24 * 60 * 60); // 3 days
+  }
 }

@@ -1,0 +1,14 @@
+model Role {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String?
+  createdAt   DateTime       @default(now())
+
+  // relations
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  // closure relations
+  ancestorClosures RoleClosure[] @relation("ancestor")
+  descendantClosures RoleClosure[] @relation("descendant")
+}
