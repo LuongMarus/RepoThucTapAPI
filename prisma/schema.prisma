@@ -58,6 +58,8 @@ model User {
 
   // Quan hệ phân quyền
   phanQuyens PhanQuyen[]
+  // TODO: Update Hierarchical RBAC later: roles, permissions, role closures
+  userRoles UserRole[]
 }
 
 model KeyToken {
