@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { REDIS_CLIENT } from './ioredis.constants';
 import type { RedisClient } from './ioredis.provider';
+import { RedisKey } from 'ioredis';
 
 @Injectable()
 export class IoredisService {
@@ -12,6 +13,10 @@ export class IoredisService {
 
   async set(key: string, value: string, expirationSeconds: number) {
     await this.client.set(key, value, 'EX', expirationSeconds);
+  }
+
+  async hset(key: RedisKey, field: string | Buffer | number, value: string) {
+    await this.client.hset(key, field, value);
   }
 
   async get(key: string): Promise<string | null> {

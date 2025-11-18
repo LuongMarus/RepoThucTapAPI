@@ -64,8 +64,11 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe({ body: authLoginSchema }))
   async login(
     @Body() body: AuthLoginDto,
+    @Req() request: Request,
   ): Promise<ResponseController<LoginResponse>> {
-    const result = await this.authService.login(body);
+    const userAgent = request.headers['user-agent'] || 'unknown';
+    const ipAddress = request.ip || '0.0.0.0';
+    const result = await this.authService.login(body, userAgent, ipAddress);
 
     return {
       message: 'Login successfully!',
