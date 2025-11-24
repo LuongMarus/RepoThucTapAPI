@@ -1,6 +1,22 @@
 services:
   # PostgreSQL Database
   postgres:
+    # Error: in 18+, these Docker images are configured to store database data in a
+    #  format which is compatible with "pg_ctlcluster" (specifically, using
+    #  major-version-specific directory names).  This better reflects how
+    #  PostgreSQL itself works, and how upgrades are to be performed.
+    #  See also https://github.com/docker-library/postgres/pull/1259⁠
+    #  Counter to that, there appears to be PostgreSQL data in:
+    #     /var/lib/postgresql/data (unused mount/volume)
+    #  This is usually the result of upgrading the Docker image without
+    #  upgrading the underlying database using "pg_upgrade" (which requires both
+    #  versions).
+    #  The suggested container configuration for 18+ is to place a single mount
+    #  at /var/lib/postgresql which will then place PostgreSQL data in a
+    #  subdirectory, allowing usage of "pg_upgrade --link" without mount point
+    #  boundary issues.
+    #  See https://github.com/docker-library/postgres/issues/37⁠ for a (long)
+    #  discussion around this process, and suggestions for how to do so.
     image: postgres:18-alpine
     container_name: saoviet-postgres
     restart: unless-stopped
@@ -12,7 +28,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - saoviet-network
@@ -49,17 +65,42 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://saoviet_user:saoviet_password@postgres:5432/saoviet_db
-      REDIS_URL: redis://redis:6379
+      APP_NAME: "Sao Viet"
       PORT: 3000
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this-in-production}
-      BCRYPT_ROUNDS: 12
+      # API Base URL and Client URL
+      API_BASE_URL: http://localhost:3000
+      CLIENT_URL: http://localhost:3001
+      # CORS
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001}
+      # TEMPORARY JWT
+      TEMP_REFRESH_TOKEN_SECRET: temp-secret-change-in-production
+      TEMP_TOKEN_SECRET: temp-token-secret-change-in-production
+      # Public key for creation JWT
+      PUBLIC_KEY_TYPE: spki
+      # CSRF
+      CSRF_SECRET: your-super-secret-csrf-key-change-this-in-production
+      # Encyption default
+      ENCRYPTION_KEY: your-super-secret-encryption-key-change-this-in-production
+      ENCRYPTION_IV_LENGTH: 16
+      # Nodemailer
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: khoacombocaptoc@gmail.com
+      SMTP_PASS: dzem etpj qvhj ukhc
+      SMTP_FROM: "Sao Viet ASC <noreply@saoviet.com>"
+      # Database (PostgreSQL)
+      DATABASE_URL: postgresql://saoviet_user:saoviet_password@postgres:5432/saoviet_db
+      # Database (Redis - for future use)
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # REDIS_USERNAME: app
+      # REDIS_PASSWORD: saoviet_password
+      REDIS_DB: 1
       # Rate limiting - Set to very high values (effectively disabled)
       RATE_LIMIT_WINDOW_MS: 3600000
       RATE_LIMIT_MAX_REQUESTS: 999999
       LOG_LEVEL: info
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001}
       TZ: Asia/Ho_Chi_Minh
       # File Upload Configuration
       UPLOAD_DIR: /app/uploads
