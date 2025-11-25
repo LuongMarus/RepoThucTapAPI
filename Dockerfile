@@ -22,7 +22,10 @@ RUN apt-get update && apt-get install -y \
 COPY package.json ./
 COPY yarn.lock ./
 COPY tsconfig.json ./
+COPY tsconfig.build.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
+COPY nest-cli.json ./
 
 # Development stage
 FROM base AS development
@@ -74,6 +77,8 @@ COPY --from=build --chown=nodeuser:nodejs /app/node_modules ./node_modules
 COPY --from=build --chown=nodeuser:nodejs /app/prisma ./prisma
 COPY --from=build --chown=nodeuser:nodejs /app/package.json ./
 COPY --from=build --chown=nodeuser:nodejs /app/yarn.lock ./
+COPY --from=build --chown=nodeuser:nodejs /app/prisma.config.ts ./
+COPY --from=build --chown=nodeuser:nodejs /app/nest-cli.json ./
 
 # Create directories for uploads and logs with proper structure
 RUN mkdir -p uploads logs && \

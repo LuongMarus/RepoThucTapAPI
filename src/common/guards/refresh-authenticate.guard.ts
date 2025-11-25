@@ -12,7 +12,8 @@ import type { Request } from 'express';
 import { KeyTokenService } from '@/modules/identity/key-token';
 import { CLIENT_ID, REFRESH_TOKEN, VALUE_TOKEN } from '../constants';
 import { requireHeader, setRefreshUser, validateUserId } from '@/utils';
-import { RefreshTokenPayload, KeyStoreForJWT } from '@/types/jwt';
+
+import type { RefreshTokenPayload, KeyStoreForJWT } from '@/types/jwt';
 
 @Injectable()
 export class JwtRefreshAuthenticateGuard implements CanActivate {
