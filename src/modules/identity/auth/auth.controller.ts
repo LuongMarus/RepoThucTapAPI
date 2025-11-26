@@ -27,7 +27,7 @@ import { KEY_THROTTLER } from '@/common/constants';
 import { AuthService } from './auth.service';
 import { authForgotPasswordSchema, authLoginSchema } from './validations';
 
-import { MailEvents } from '@/common/enums/mail.events';
+import { MailEvents } from '@/common/enums/mail-events';
 
 import type { ResponseController } from '@/types/response-controller';
 import type { AuthLoginDto, AuthForgotPasswordDto } from './dto';

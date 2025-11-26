@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 import { MailService } from './mail.service';
-import { MailEvents } from '@/common/enums/mail.events';
+import { MailEvents } from '@/common/enums/mail-events';
 
 import type { ForgotPasswordEmailPayload } from './interfaces/email-payload';
 
