@@ -25,7 +25,7 @@ import type {
 } from '@/types/jwt';
 import type { Session } from '@/types/session';
 import type { EnvConfig } from '@/configs';
-import { KeyToken } from '@/generated/prisma/client';
+import type { KeyToken } from '@/generated/prisma/client';
 
 @Injectable()
 export class KeyTokenService {
@@ -372,8 +372,6 @@ export class KeyTokenService {
 
   validateToken<TDecoded>(decoded: TDecoded & { iat: number }, maxAge: number) {
     const now = Math.floor(Date.now() / 1000);
-    //   const maxAge = 60 * 60 * 10; // 10 hours
-
     if (now - decoded.iat > maxAge) {
       throw new UnauthorizedException('Token expired');
     }
