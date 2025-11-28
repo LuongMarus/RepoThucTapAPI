@@ -7,6 +7,7 @@ import { RoleClosureModule } from '../role-closure';
 import { RoleService } from './role.service';
 import { RoleRepository } from './role.repository';
 import { RolePermissionModule } from '../role-permission';
+import { ExtractPagination } from '@/utils/extract-pagination';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { RolePermissionModule } from '../role-permission';
     RoleClosureModule,
     RolePermissionModule,
   ],
-  providers: [RoleService, RoleRepository],
+  providers: [RoleService, RoleRepository, ExtractPagination],
   exports: [RoleService, RoleRepository],
 })
 export class RoleModule {}

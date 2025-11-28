@@ -88,7 +88,7 @@ export class RoleService {
 
     // Find root (role without parent depth=1)
     const roots = roles
-      .filter((r) => !r.ancestorClosures.some((c) => c.depth === 1)) // role without parent depth=1
+      .filter((r) => r.ancestorClosures.some((c) => c.depth === 1)) // role without parent depth=1
       .map((r) => map.get(r.id));
 
     return roots;

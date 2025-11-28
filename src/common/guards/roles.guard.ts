@@ -1,7 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -10,6 +10,7 @@ import { ROLES_KEY, RolesTypes } from '../decorators';
 import type { Request } from 'express';
 import { Roles } from '../enums';
 
+@Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
@@ -19,8 +20,9 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
     );
 
+    // If no roles are specified, allow access (public route)
     if (!roles) {
-      throw new ForbiddenException('No roles required');
+      return true;
     }
 
     const request = context.switchToHttp().getRequest<Request>();

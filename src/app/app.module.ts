@@ -13,7 +13,14 @@ import { ConfigModule } from '@/infrastructures/config';
 import { RolesGuard } from '@/common/guards';
 
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
-import { AuthModule } from '@/modules/identity';
+import {
+  AuthModule,
+  RoleModule,
+  RoleClosureModule,
+  RolePermissionModule,
+  UserRoleModule,
+  PermissionModule,
+} from '@/modules/identity';
 import { MailModule } from '@/modules/mail';
 import { ReceiptsModule } from '@/modules/receipts';
 import { WarehousesModule } from '@/modules/warehouses';
@@ -30,7 +37,14 @@ import { ProductsModule } from '@/modules/products';
     IoredisModule,
     HealthModule,
     MailModule,
+    // Identity Context
     AuthModule,
+    RoleModule,
+    RoleClosureModule,
+    RolePermissionModule,
+    UserRoleModule,
+    PermissionModule,
+    // =================
     ReceiptsModule,
     WarehousesModule,
     UnitsModule,
