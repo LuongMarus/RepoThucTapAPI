@@ -50,9 +50,9 @@ export class HealthController {
       () =>
         this.disk.checkStorage('disk', {
           path: process.platform === 'win32' ? 'C:\\' : '/',
-          thresholdPercent: 25 * 1024 * 1024 * 1024, // 25GB
+          thresholdPercent: 0.85, // 85% disk usage threshold
         }),
-      () => this.memory.checkHeap('memory_heap', 50 * 1024 * 1024), // 50MB
+      () => this.memory.checkHeap('memory_heap', 200 * 1024 * 1024), // 200MB
     ]);
 
     return {

@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@/generated/prisma/client';
 
+@Injectable()
 export class ExtractPagination {
   buildSortOrder = <T>(sortBy?: string, sortOrder?: string): T => {
     if (!sortBy) return { createdAt: 'desc' } as T;

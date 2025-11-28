@@ -33,6 +33,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode = res.error || exception.name;
       responseError = res;
       stack = exception.stack;
+    } else {
+      // Log non-HTTP exceptions for debugging
+      console.error('[GlobalExceptionFilter] Unhandled exception:', exception);
+      message = (exception as Error)?.message || 'Internal server error';
+      stack = (exception as Error)?.stack;
     }
 
     response.status(status).json({
