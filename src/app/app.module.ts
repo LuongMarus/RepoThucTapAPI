@@ -19,12 +19,15 @@ import {
   UserRoleModule,
   PermissionModule,
   KeyTokenModule,
+  UserModule,
 } from '@/modules/identity';
 import { MailModule } from '@/modules/mail';
 import { ReceiptsModule } from '@/modules/receipts';
 import { WarehousesModule } from '@/modules/warehouses';
 import { UnitsModule } from '@/modules/units';
 import { ProductsModule } from '@/modules/products';
+import { CustomersModule } from '@/modules/customers';
+import { SuppliersModule } from '@/modules/suppliers';
 
 @Module({
   imports: [
@@ -44,11 +47,14 @@ import { ProductsModule } from '@/modules/products';
     RolePermissionModule,
     UserRoleModule,
     PermissionModule,
+    UserModule,
     // =================
     ReceiptsModule,
     WarehousesModule,
     UnitsModule,
     ProductsModule,
+    CustomersModule,
+    SuppliersModule,
   ],
   controllers: [AppController],
   providers: [
