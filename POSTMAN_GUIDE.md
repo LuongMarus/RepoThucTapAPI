@@ -2,7 +2,7 @@
 
 ## Base URL
 
-```
+```bash
 http://localhost:3000/api
 ```
 
@@ -328,8 +328,8 @@ Body (JSON):
 ```json
 {
   "message": "Operation successful",
-  "metadata": {
-    "data": [...],
+  "data": {
+    "items": [...],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -339,6 +339,7 @@ Body (JSON):
       "hasPrev": false
     }
   }
+  ,...
 }
 ```
 
