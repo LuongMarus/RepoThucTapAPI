@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { envConfigSchema } from '@/common/validations/env-config';
 
 export type EnvConfig = z.infer<typeof envConfigSchema>;
