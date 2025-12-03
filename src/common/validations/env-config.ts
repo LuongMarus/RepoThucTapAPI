@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { SystemDatabaseProvider as SystemDatabaseProviderEnum } from '../enums';
 
 export const envConfigSchema = z.object({
