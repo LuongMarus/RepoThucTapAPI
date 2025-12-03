@@ -47,7 +47,7 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   // Database (PostgreSQL)
   DATABASE_URL: process.env.DATABASE_URL,
   // Direct URL for Neon database (non-pooling)
-  DIRECT_URL: process.env.DIRECT_URL,
+  // DIRECT_URL: process.env.DIRECT_URL,
 
   // Database (Redis)
   REDIS_HOST: process.env.REDIS_HOST,

@@ -49,7 +49,7 @@ export const envConfigSchema = z.object({
   // Database (PostgreSQL)
   DATABASE_URL: z.url(),
   // Direct URL for Neon database (non-pooling)
-  DIRECT_URL: z.url().optional(),
+  // DIRECT_URL: z.url().optional().nullable(),
   // Redis
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
