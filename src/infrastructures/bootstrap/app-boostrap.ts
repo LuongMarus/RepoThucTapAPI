@@ -25,6 +25,7 @@ import { ResponseTransformInterceptor } from '@/common/interceptors';
 
 import { AppModule } from '@/app';
 import { loadOpenApiYaml, mergeOpenApiDocument } from '../documentation';
+import { VERSION_NEUTRAL, VersioningType } from '@nestjs/common';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
@@ -117,6 +118,10 @@ export class AppBootstrap {
 
   private setGlobalPrefix() {
     this.app.setGlobalPrefix('api');
+    this.app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: VERSION_NEUTRAL,
+    });
   }
 
   private async handleUploadDirectories() {
