@@ -1,3 +1,4 @@
+import { VERSION_NEUTRAL, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
@@ -25,7 +26,6 @@ import { ResponseTransformInterceptor } from '@/common/interceptors';
 
 import { AppModule } from '@/app';
 import { loadOpenApiYaml, mergeOpenApiDocument } from '../documentation';
-import { VERSION_NEUTRAL, VersioningType } from '@nestjs/common';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
