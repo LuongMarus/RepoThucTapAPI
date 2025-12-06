@@ -8,7 +8,8 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
-import path from 'path';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
+import path, { join } from 'path';
 import * as fs from 'fs';
 
 import {
@@ -18,7 +19,6 @@ import {
   envConfig,
   helmetConfig,
   swaggerConfig,
-  swaggerCustomOptions,
   swaggerDocumentOptions,
   uploadDir,
 } from '@/configs';
@@ -26,7 +26,11 @@ import { GlobalExceptionFilter } from '@/common/filters';
 import { ResponseTransformInterceptor } from '@/common/interceptors';
 
 import { AppModule } from '@/app';
-import { loadOpenApiYaml, mergeOpenApiDocument } from '../documentation';
+import {
+  loadOpenApiYaml,
+  mergeOpenApiDocument,
+  SwaggerUI,
+} from '../documentation';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
@@ -94,12 +98,19 @@ export class AppBootstrap {
   }
 
   private initializeOpenapi() {
+    // Serve static assets for Swagger custom JS
+    this.app.useStaticAssets(join(__dirname, '..', '..', 'served'), {
+      prefix: '/api/',
+    });
+
     const documentFactory = () => {
       const document = SwaggerModule.createDocument(
         this.app,
         swaggerConfig,
         swaggerDocumentOptions,
       );
+
+      cleanupOpenApiDoc(document);
 
       fs.writeFileSync(
         'documents/postman/SaoViet.postman_collection.json',
@@ -115,11 +126,13 @@ export class AppBootstrap {
       return document;
     };
 
+    const swaggerUI = new SwaggerUI(envConfig.API_BASE_URL);
+
     SwaggerModule.setup(
       'api-docs',
       this.app,
       documentFactory,
-      swaggerCustomOptions,
+      swaggerUI.customOptions,
     );
   }
 
