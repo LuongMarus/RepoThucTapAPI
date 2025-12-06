@@ -1,4 +1,13 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
+
 import { WarehousesService } from './warehouses.service';
 import { ResponseController } from '@/types/response-controller';
 
@@ -10,6 +19,7 @@ type CreateWarehouseDto = {
 };
 
 @Controller({ path: 'warehouses', version: '1' })
+@ApiTags('Warehouses')
 export class WarehousesController {
   constructor(private readonly warehousesService: WarehousesService) {}
 

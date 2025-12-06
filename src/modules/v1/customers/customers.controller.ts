@@ -9,6 +9,7 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '@/common/pipes';
 
@@ -30,6 +31,7 @@ import type {
 } from './dto';
 
 @Controller({ path: 'customers', version: '1' })
+@ApiTags('Customers')
 export class CustomersController {
   constructor(private customersService: CustomersService) {}
 

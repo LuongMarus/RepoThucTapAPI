@@ -9,6 +9,14 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '@/common/pipes';
 
@@ -30,6 +38,7 @@ import type {
 } from './dto';
 
 @Controller({ path: 'suppliers', version: '1' })
+@ApiTags('Suppliers')
 export class SuppliersController {
   constructor(private suppliersService: SuppliersService) {}
 

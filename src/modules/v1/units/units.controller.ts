@@ -1,4 +1,13 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
+
 import { UnitsService } from './units.service';
 import { ResponseController } from '@/types/response-controller';
 
@@ -8,6 +17,7 @@ type CreateUnitDto = {
 };
 
 @Controller({ path: 'units', version: '1' })
+@ApiTags('Units')
 export class UnitsController {
   constructor(private readonly unitsService: UnitsService) {}
 

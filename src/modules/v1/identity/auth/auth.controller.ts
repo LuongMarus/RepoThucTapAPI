@@ -14,6 +14,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { ZodValidationPipe } from '@/common/pipes/validation.pipe';
@@ -37,6 +38,7 @@ import type { LoginResponse, RefreshResponse } from './interfaces';
 import type { ForgotPasswordEmailPayload } from '@/modules/v1/mail';
 
 @Controller({ path: 'auth', version: '1' })
+@ApiTags('Auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -48,6 +50,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ [KEY_THROTTLER.LONG]: { limit: 100, ttl: 60000 } })
   @UseGuards(JwtAuthenticateGuard)
+  @ApiOperation({
+    summary: 'Get current user',
+    description: `
+      * Only authenticated user can use this API
+      * Get current user information
+    `,
+  })
   async me(
     @Req() request: Request,
   ): Promise<ResponseController<UserWithoutPassword>> {
@@ -69,6 +78,49 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe({ body: authLoginSchema }))
+  @ApiOperation({
+    summary: 'Login',
+    description: `
+      * Login with username and password
+      * Return if login successfully: 
+      * - user omit password
+      * - access token
+      * - refresh token
+      * - access token expires in
+      * - refresh token expires in
+      * - access token iat
+      * - refresh token iat
+      * - if login failed:
+      * - - error message
+      * - - error code
+      * - - error status
+      * - - error stack
+      * - - error timestamp
+      * - - error path
+    `,
+    externalDocs: {
+      url: 'https://example.com',
+      description: 'Login with username and password',
+    },
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: {
+          type: 'string',
+          description: 'Username for authentication',
+          example: 'admin',
+        },
+        password: {
+          type: 'string',
+          description: 'Password for authentication',
+          example: 'Admin@123',
+        },
+      },
+      required: ['username', 'password'],
+    },
+  })
   async login(
     @Body() body: AuthLoginDto,
     @Req() request: Request,

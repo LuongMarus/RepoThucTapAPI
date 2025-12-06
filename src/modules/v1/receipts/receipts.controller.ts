@@ -1,4 +1,13 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
+
 import { ReceiptsService } from './receipts.service';
 import { ResponseController } from '@/types/response-controller';
 
@@ -18,6 +27,7 @@ type CreateReceiptDto = {
 };
 
 @Controller({ path: 'receipts', version: '1' })
+@ApiTags('Receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
 

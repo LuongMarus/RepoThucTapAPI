@@ -10,6 +10,14 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { Roles } from '@/common/decorators';
 import { Roles as RolesEnum } from '@/common/enums';
@@ -36,6 +44,7 @@ import type {
 @Controller({ path: 'users', version: '1' })
 @UseGuards(RolesGuard)
 @Roles(RolesEnum.ADMIN)
+@ApiTags('User')
 export class UserController {
   constructor(private userService: UserService) {}
 

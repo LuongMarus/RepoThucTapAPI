@@ -9,6 +9,14 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { Roles } from '@/common/decorators';
 import { Roles as RolesEnum } from '@/common/enums';
@@ -42,6 +50,7 @@ import type { Role } from '@/generated/prisma/client';
 @Controller({ path: 'role', version: '1' })
 @UseGuards(RolesGuard)
 @Roles(RolesEnum.ADMIN)
+@ApiTags('Role')
 export class RoleController {
   constructor(private roleService: RoleService) {}
 
