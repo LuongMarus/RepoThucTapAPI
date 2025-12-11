@@ -7,12 +7,14 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '@/common/pipes/validation.pipe';
+import { JwtAuthenticateGuard } from '@/common/guards';
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { ReceiptsService } from './receipts.service';
@@ -49,6 +51,7 @@ import {
 } from './docs/validate-receipt.doc';
 
 @Controller({ path: 'receipts', version: '1' })
+@UseGuards(JwtAuthenticateGuard)
 @ApiTags('Receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}

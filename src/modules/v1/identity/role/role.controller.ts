@@ -16,7 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '@/common/decorators';
 import { Roles as RolesEnum } from '@/common/enums';
-import { RolesGuard } from '@/common/guards';
+import { JwtAuthenticateGuard, RolesGuard } from '@/common/guards';
 import { ZodValidationPipe } from '@/common/pipes';
 import { KEY_THROTTLER } from '@/common/constants';
 
@@ -87,7 +87,7 @@ import {
 } from './docs/delete-parent-from-role.doc';
 
 @Controller({ path: 'role', version: '1' })
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthenticateGuard, RolesGuard)
 @Roles(RolesEnum.ADMIN)
 @ApiTags('Role')
 export class RoleController {

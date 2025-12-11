@@ -9,12 +9,14 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '@/common/pipes';
+import { JwtAuthenticateGuard } from '@/common/guards';
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { SuppliersService } from './suppliers.service';
@@ -67,6 +69,7 @@ import {
 } from './docs/restore-supplier.doc';
 
 @Controller({ path: 'suppliers', version: '1' })
+@UseGuards(JwtAuthenticateGuard)
 @ApiTags('Suppliers')
 export class SuppliersController {
   constructor(private suppliersService: SuppliersService) {}
