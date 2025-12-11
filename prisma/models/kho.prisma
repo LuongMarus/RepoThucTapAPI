@@ -4,6 +4,10 @@ model Kho {
   tenKho   String
   diaChi   String?  @db.VarChar(255)
   dienTich Decimal? @db.Decimal(10, 2)
+  kinhDo   Decimal? @db.Decimal(10, 2)
+  viDo     Decimal? @db.Decimal(10, 2)
+  tenTruongKho String? @db.VarChar(255)
+  sdtTruongKho String? @db.VarChar(255)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
