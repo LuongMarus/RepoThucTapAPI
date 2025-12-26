@@ -86,7 +86,7 @@ import {
   DeleteParentFromRoleApiResponse,
 } from './docs/delete-parent-from-role.doc';
 
-@Controller({ path: 'role', version: '1' })
+@Controller({ path: 'roles', version: '1' })
 @UseGuards(JwtAuthenticateGuard, RolesGuard)
 @Roles(RolesEnum.ADMIN)
 @ApiTags('Role')

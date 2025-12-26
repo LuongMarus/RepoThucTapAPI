@@ -19,8 +19,8 @@ async function postData(url, data = {}) {
 }
 
 const AUTH_CREDENTIALS = {
-  username: 'admin',
-  password: 'Admin@123',
+  username: envConfig.DEMO_USERNAME,
+  password: envConfig.DEMO_PASSWORD,
 };
 
 postData(`${envConfig.API_BASE_URL}/api/v1/auth/login`, AUTH_CREDENTIALS)

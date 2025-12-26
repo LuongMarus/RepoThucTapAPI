@@ -11,6 +11,8 @@ export const envConfigSchema = z.object({
   // API Base URL
   API_BASE_URL: z.string(),
   CLIENT_URL: z.string(),
+  DEMO_USERNAME: z.string(),
+  DEMO_PASSWORD: z.string(),
   // SMTP
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number().int().positive().default(587),

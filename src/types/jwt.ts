@@ -6,16 +6,20 @@ import type { JwtPayload } from 'jsonwebtoken';
 import type { RolesScopeType, RolesType } from './role';
 import type { KeyTokenModel } from '@/generated/prisma/models/KeyToken';
 
-export interface RefreshTokenPayload
-  extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
+export interface RefreshTokenPayload extends Pick<
+  JwtPayload,
+  'aud' | 'exp' | 'iat'
+> {
   id: string;
   email: string;
   keyStoreId: string;
   sessionId?: string; // optional to tracking multiple devices
 }
 
-export interface AccessTokenPayload
-  extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
+export interface AccessTokenPayload extends Pick<
+  JwtPayload,
+  'aud' | 'exp' | 'iat'
+> {
   id: string;
   email: string;
   username: string;
