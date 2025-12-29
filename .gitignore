@@ -79,3 +79,5 @@ ERD.md
 
 # Secret Data
 secret.txt
+
+/src/metadata.ts
