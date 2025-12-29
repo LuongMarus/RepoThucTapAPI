@@ -50,7 +50,7 @@ services:
         max-file: "3"
 
   redis:
-    image: redis:7-alpine
+    image: redis:8.2.2-alpine3.22
     container_name: saoviet_redis_dev
     restart: unless-stopped
     # command: >

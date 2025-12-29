@@ -28,7 +28,8 @@ import {
   PermissionCheckApiResponse,
 } from './docs/permission-check.doc';
 
-@Controller({ path: 'permission', version: '1' })
+@Controller({ path: 'permissions', version: '1' })
+@UseGuards(JwtAuthenticateGuard)
 @ApiTags('Permission')
 export class PermissionController {
   constructor(private permissionService: PermissionService) {}

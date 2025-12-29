@@ -6,12 +6,14 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '@/common/pipes/validation.pipe';
+import { JwtAuthenticateGuard } from '@/common/guards';
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { WarehousesService } from './warehouses.service';
@@ -35,6 +37,7 @@ import {
 } from './docs/find-one-by-id.doc';
 
 @Controller({ path: 'warehouses', version: '1' })
+@UseGuards(JwtAuthenticateGuard)
 @ApiTags('Warehouses')
 export class WarehousesController {
   constructor(private readonly warehousesService: WarehousesService) {}

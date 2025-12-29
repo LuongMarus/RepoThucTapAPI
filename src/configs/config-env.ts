@@ -10,6 +10,8 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
 
   API_BASE_URL: process.env.API_BASE_URL,
   CLIENT_URL: process.env.CLIENT_URL,
+  DEMO_USERNAME: process.env.DEMO_USERNAME,
+  DEMO_PASSWORD: process.env.DEMO_PASSWORD,
 
   // SMTP
   SMTP_HOST: process.env.SMTP_HOST,
